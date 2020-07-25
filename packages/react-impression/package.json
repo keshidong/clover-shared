@@ -1,0 +1,30 @@
+{
+  "main": "lib/index.js",
+  "module": "esm/index.js",
+  "sideEffects": false,
+  "files": [
+    "lib/",
+    "esm/"
+  ],
+  "types": "lib/index.d.ts",
+  "typings": "lib/index.d.ts",
+  "scripts": {
+    "build:cjs": "tsc",
+    "build:es": "tsc -m esNext --outDir esm"
+  },
+  "name": "react-impression",
+  "version": "1.0.0",
+  "description": "Item exposure tracking in react project",
+  "repository": "git@github.com:keshidong/react-impression.git",
+  "author": "shidong.ke <keshidong.dev@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "hoist-non-react-statics": "^3.3.2",
+    "impressionjs": "1.0.0",
+    "react": "^16.13.1"
+  },
+  "devDependencies": {
+    "@types/node": "^14.0.26",
+    "@types/react": "^16.9.43"
+  }
+}
