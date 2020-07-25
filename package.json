@@ -1,0 +1,17 @@
+{
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "types": "lib/index.d.ts",
+  "typings": "lib/index.d.ts",
+  "name": "impressionjs",
+  "version": "1.0.0",
+  "description": "Item exposure tracking in react project",
+  "repository": "git@github.com:keshidong/react-impression.git",
+  "author": "shidong.ke <keshidong.dev@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^3.9.7"
+  }
+}
