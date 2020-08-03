@@ -3,15 +3,20 @@ import 'intersection-observer'
 const defaultViewAreaCoveragePercentThreshold = 0.5
 const defaultMinimumViewTime = 1000 // 1000ms
 
-export type getDataType = () => any
+const thresholdDeta = 0.001 // if scroll slowly, entry.intersectionRatio will exqual to viewAreaCoveragePercentThreshold
+
+export type getDataType<T> = {
+  (): T;
+}
+
 export type ProxyIntersectionObserverType = {
-  observe: (target: Element, getData?: getDataType) => void;
+  observe: <T>(target: Element, getData?: getDataType<T>) => void;
   unobserve: (target: Element) => void;
   disconnect: () => void;
 }
 
-export function createImpressionObserver(
-  track: (elementTarget: Element, getData: getDataType) => void,
+export function createImpressionObserver<T>(
+  track: (data: T) => void,
   {
     viewAreaCoveragePercentThreshold = defaultViewAreaCoveragePercentThreshold,
     minimumViewTime = defaultMinimumViewTime,
@@ -23,7 +28,7 @@ export function createImpressionObserver(
   const observer = new window.IntersectionObserver((entries) => {
     // wait for expose
     entries.forEach(entry => {
-      if (entry.intersectionRatio > viewAreaCoveragePercentThreshold) {
+      if (entry.intersectionRatio >= (viewAreaCoveragePercentThreshold - thresholdDeta)) {
         // expose the same target only once
         if (hasImpressionTargetSet.has(entry.target)) return
 
@@ -33,9 +38,8 @@ export function createImpressionObserver(
           if (!candidateImpressionMap.has(entry.target)) return
 
           // upload track data
-          track(entry.target, impressionGetDataMap.get(entry.target))
-          // TODO test
-          console.log(entry.target)
+          const getData = impressionGetDataMap.get(entry.target)
+          track(typeof getData === 'function' ? getData() : undefined)
 
           candidateImpressionMap.delete(entry.target)
           // mark, impression only once
@@ -50,9 +54,9 @@ export function createImpressionObserver(
         }
       }
     })
-  })
+  }, { threshold: viewAreaCoveragePercentThreshold })
   return {
-    observe: (target: Element, getData?: getDataType) => {
+    observe: <T>(target: Element, getData?: getDataType<T>) => {
       observer.observe(target)
 
       impressionGetDataMap.set(target, getData)

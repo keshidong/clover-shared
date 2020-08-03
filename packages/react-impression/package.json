@@ -12,7 +12,7 @@
     "build:cjs": "tsc",
     "build:es": "tsc -m esNext --outDir esm"
   },
-  "name": "react-impression",
+  "name": "@clover-shared/impression",
   "version": "1.0.0",
   "description": "Item exposure tracking in react project",
   "repository": "git@github.com:keshidong/react-impression.git",

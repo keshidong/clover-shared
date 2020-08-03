@@ -1,8 +1,7 @@
-import { MutableRefObject, useRef } from 'react'
+import { MutableRefObject, useRef, useCallback } from 'react'
 
 // https://github.com/facebook/react/issues/13029
 export type InputRef<T> = ((instance: T | null) => void) | MutableRefObject<T | null> | null
-
 /**
  * Works like normal useRef, but accepts second argument which is array
  * of additional refs of the same type. Ref value will be shared with
@@ -11,13 +10,15 @@ export type InputRef<T> = ((instance: T | null) => void) | MutableRefObject<T | 
 export default function useSharedRef<T>(initialValue: T, refsToShare: Array<InputRef<T>>) {
   // actual ref that will hold the value
   const innerRef = useRef<T>(initialValue)
+  const refsToShareRef = useRef<Array<InputRef<T>>>(refsToShare)
+  refsToShareRef.current = refsToShare
 
   // ref function that will update innerRef value as well as will publish value to all provided refs
-  function sharingRef(value: T) {
+  const sharingRef = useCallback(function sharingRef(value: T) {
     // update inner value
     innerRef.current = value
     // for each provided ref - update it as well
-    refsToShare.forEach((resolvableRef) => {
+    refsToShareRef.current.forEach((resolvableRef) => {
       // react supports various types of refs
       if (typeof resolvableRef === 'function') {
         // if it's functional ref - call it with new value
@@ -30,7 +31,8 @@ export default function useSharedRef<T>(initialValue: T, refsToShare: Array<Inpu
         }
       }
     })
-  }
+  }, [])
+
 
   /**
    * We want ref we return to work using .current, but it has to be function in order
@@ -44,7 +46,7 @@ export default function useSharedRef<T>(initialValue: T, refsToShare: Array<Inpu
       get() {
         return innerRef.current
       },
-    });
+    })
   }
 
   return sharingRef as typeof sharingRef & { current: T }
