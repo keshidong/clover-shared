@@ -7,10 +7,15 @@ import 'intersection-observer'
 
 const ImpressionContext = React.createContext<React.RefObject<ProxyIntersectionObserverType>>({ current: null })
 
-export const useImpression = <T,>(targetRef: React.RefObject<Element>, data: T) => {
+export const useImpression = (targetRef: React.RefObject<Element>, cb: () => void) => {
   const observerRef = useContext(ImpressionContext)
-  const dataRef = useRef(data)
-  dataRef.current = data
+
+  const cbRef = useRef(cb)
+  cbRef.current = cb
+  const stableCb = useCallback(() => {
+    cbRef.current()
+  }, [])
+  
 
   useEffect(() => {
     const observer = observerRef.current
@@ -18,7 +23,7 @@ export const useImpression = <T,>(targetRef: React.RefObject<Element>, data: T) 
 
     if (!observer || !target || !(target instanceof Element)) return
 
-    observer.observe(target, () => dataRef.current)
+    observer.observe(target, stableCb)
 
     return () => {
       observer.unobserve(target)
@@ -27,13 +32,14 @@ export const useImpression = <T,>(targetRef: React.RefObject<Element>, data: T) 
 }
 
 type impressionDataType<P> = { impressionData: P }
-export const withImpression = <P, T extends {}>(
+type onImression<P> = (impressionData: P) => void
+export const withImpression = <P, T extends {}>(onImression: onImression<P>) => (
   ComposedComponent: string | React.ComponentClass<React.ComponentPropsWithoutRef<any> & { ref: React.RefObject<Element> }>
 ) => {
   const WithImpressionWrapper = React.forwardRef<Element, impressionDataType<P> & React.HTMLAttributes<Element> & T>((props, forwardedRef) => {
     const ref = useSharedRef<null | Element>(null, [forwardedRef])
     const { impressionData, ...restProps } = props
-    useImpression(ref, impressionData)
+    useImpression(ref, () => { onImression(impressionData) })
     return <ComposedComponent ref={ref} {...restProps} />
   })
 
@@ -51,31 +57,24 @@ export const withImpression = <P, T extends {}>(
 
 type ImpressionProviderPropsType<T> = {
   children: React.ReactNode;
-  track: (data: T) => void;
   viewAreaCoveragePercentThreshold?: number;
   minimumViewTime?: number;
 }
 
-export default function ImpressionProvider<T> ({
+export function ImpressionProvider<T> ({
   children,
-  track,
   viewAreaCoveragePercentThreshold,
   minimumViewTime,
 }: ImpressionProviderPropsType<T>) {
   const observerRef = useRef<null | ProxyIntersectionObserverType>(null)
-  const trackRef = useRef(track)
-  trackRef.current = track
-
-  const trackF = useCallback((data: T) => {
-    trackRef.current(data)
-  }, [])
   useEffect(() => {
-    const impressionObserver = createImpressionObserver<T>(trackF, { viewAreaCoveragePercentThreshold, minimumViewTime })
+    const impressionObserver = createImpressionObserver({ viewAreaCoveragePercentThreshold, minimumViewTime })
     observerRef.current = impressionObserver
 
     return impressionObserver.disconnect
-  }, [viewAreaCoveragePercentThreshold, minimumViewTime, trackF])
+  }, [viewAreaCoveragePercentThreshold, minimumViewTime])
 
+  console.log('React', React)
   return <ImpressionContext.Provider value={observerRef}>
     {children}
   </ImpressionContext.Provider>

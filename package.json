@@ -1,14 +1,11 @@
 {
   "private": true,
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "packages/examples/*"
   ],
-  "types": "lib/index.d.ts",
-  "typings": "lib/index.d.ts",
-  "name": "impressionjs",
-  "version": "1.0.0",
-  "description": "Item exposure tracking in react project",
-  "repository": "git@github.com:keshidong/react-impression.git",
+  "description": "Shared lib",
+  "repository": "git@github.com:keshidong/clover-shared.git",
   "author": "shidong.ke <keshidong.dev@gmail.com>",
   "license": "MIT",
   "devDependencies": {

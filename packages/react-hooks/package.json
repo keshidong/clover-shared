@@ -1,0 +1,13 @@
+{
+    "name": "@clover-shared/react-hooks",
+    "main": "lib/index.js",
+    "version": "1.0.0",
+    "source": {
+        "./lib/*.js": "./src/$1"
+    },
+    "description": "React hooks utils",
+    "license": "MIT",
+    "dependencies": {
+        "react": "^16.13.1"
+    }
+}

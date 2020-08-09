@@ -1,3 +1,2 @@
-import useSharedRef from "../../react-impression/src/useSharedRef";
+export { default as useSharedRef } from './useSharedRef'
 
-export useSharedRef from ''

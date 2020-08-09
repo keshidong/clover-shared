@@ -1,5 +1,8 @@
 {
   "main": "lib/index.js",
+  "source": {
+    "./lib/*.js": "./src/$1"
+  },
   "module": "esm/index.js",
   "sideEffects": false,
   "files": [
@@ -12,7 +15,7 @@
     "build:cjs": "tsc",
     "build:es": "tsc -m esNext --outDir esm"
   },
-  "name": "@clover-shared/impression",
+  "name": "@clover-shared/react-impression",
   "version": "1.0.0",
   "description": "Item exposure tracking in react project",
   "repository": "git@github.com:keshidong/react-impression.git",
@@ -20,7 +23,8 @@
   "license": "MIT",
   "dependencies": {
     "hoist-non-react-statics": "^3.3.2",
-    "impressionjs": "1.0.0",
+    "@clover-shared/impression": "1.0.0",
+    "@clover-shared/react-hooks": "1.0.0",
     "react": "^16.13.1"
   },
   "devDependencies": {

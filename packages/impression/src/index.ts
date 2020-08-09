@@ -5,18 +5,17 @@ const defaultMinimumViewTime = 1000 // 1000ms
 
 const thresholdDeta = 0.001 // if scroll slowly, entry.intersectionRatio will exqual to viewAreaCoveragePercentThreshold
 
-export type getDataType<T> = {
-  (): T;
+export type cbType = {
+  (): void;
 }
 
 export type ProxyIntersectionObserverType = {
-  observe: <T>(target: Element, getData?: getDataType<T>) => void;
+  observe: <T>(target: Element, cb?: cbType) => void;
   unobserve: (target: Element) => void;
   disconnect: () => void;
 }
 
-export function createImpressionObserver<T>(
-  track: (data: T) => void,
+export function createImpressionObserver(
   {
     viewAreaCoveragePercentThreshold = defaultViewAreaCoveragePercentThreshold,
     minimumViewTime = defaultMinimumViewTime,
@@ -38,8 +37,8 @@ export function createImpressionObserver<T>(
           if (!candidateImpressionMap.has(entry.target)) return
 
           // upload track data
-          const getData = impressionGetDataMap.get(entry.target)
-          track(typeof getData === 'function' ? getData() : undefined)
+          const cb = impressionGetDataMap.get(entry.target)
+          typeof cb === 'function' ? cb() : undefined
 
           candidateImpressionMap.delete(entry.target)
           // mark, impression only once
@@ -56,10 +55,10 @@ export function createImpressionObserver<T>(
     })
   }, { threshold: viewAreaCoveragePercentThreshold })
   return {
-    observe: <T>(target: Element, getData?: getDataType<T>) => {
+    observe: (target: Element, cb?: cbType) => {
       observer.observe(target)
 
-      impressionGetDataMap.set(target, getData)
+      impressionGetDataMap.set(target, cb)
     },
     unobserve: (target: Element) => {
       observer.unobserve(target)
