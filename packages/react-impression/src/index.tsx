@@ -3,7 +3,22 @@ import hoistStatics from 'hoist-non-react-statics'
 import { createImpressionObserver, ProxyIntersectionObserverType } from '@clover-shared/impression'
 import { useSharedRef } from '@clover-shared/react-hooks'
 
-import 'intersection-observer'
+// https://stackoverflow.com/questions/384286/how-do-you-check-if-a-javascript-object-is-a-dom-object
+//Returns true if it is a DOM node
+function isNode(o){
+  return (
+    typeof Node === "object" ? o instanceof Node :
+    o && typeof o === "object" && typeof o.nodeType === "number" && typeof o.nodeName==="string"
+  )
+}
+
+//Returns true if it is a DOM element
+function isElement(o){
+  return (
+    typeof HTMLElement === "object" ? o instanceof HTMLElement : //DOM2
+    o && typeof o === "object" && o !== null && o.nodeType === 1 && typeof o.nodeName==="string"
+  )
+}
 
 const ImpressionContext = React.createContext<React.RefObject<ProxyIntersectionObserverType>>({ current: null })
 
@@ -15,31 +30,41 @@ export const useImpression = (targetRef: React.RefObject<Element>, cb: () => voi
   const stableCb = useCallback(() => {
     cbRef.current()
   }, [])
-  
+
 
   useEffect(() => {
     const observer = observerRef.current
     const target = targetRef.current
+    let domElement = null
+    if (target && !isNode(target)) {
+      // eslint-disable-next-line react/no-find-dom-node
+      const node = ReactDOM.findDOMNode(target)
+      if (node && isElement(node)) {
+        domElement = node
+      }
+    } else if (target && isElement(target)) {
+      domElement = target
+    }
 
-    if (!observer || !target || !(target instanceof Element)) return
+    if (!observer || !domElement) return
 
-    observer.observe(target, stableCb)
+    observer.observe(domElement, stableCb)
 
     return () => {
-      observer.unobserve(target)
+      observer.unobserve(domElement)
     }
-  }, [observerRef, targetRef])
+  }, [observerRef, targetRef, stableCb])
 }
 
-type impressionDataType<P> = { impressionData: P }
-type onImression<P> = (impressionData: P) => void
+type impressionDataType<P> = { trackData: P }
+type onImression<P> = (trackData: P) => void
 export const withImpression = <P, T extends {}>(onImression: onImression<P>) => (
   ComposedComponent: string | React.ComponentClass<React.ComponentPropsWithoutRef<any> & { ref: React.RefObject<Element> }>
 ) => {
   const WithImpressionWrapper = React.forwardRef<Element, impressionDataType<P> & React.HTMLAttributes<Element> & T>((props, forwardedRef) => {
     const ref = useSharedRef<null | Element>(null, [forwardedRef])
-    const { impressionData, ...restProps } = props
-    useImpression(ref, () => { onImression(impressionData) })
+    const { trackData, ...restProps } = props
+    useImpression(ref, () => { onImression(trackData) })
     return <ComposedComponent ref={ref} {...restProps} />
   })
 
@@ -74,7 +99,6 @@ export function ImpressionProvider<T> ({
     return impressionObserver.disconnect
   }, [viewAreaCoveragePercentThreshold, minimumViewTime])
 
-  console.log('React', React)
   return <ImpressionContext.Provider value={observerRef}>
     {children}
   </ImpressionContext.Provider>

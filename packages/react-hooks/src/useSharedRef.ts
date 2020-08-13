@@ -41,7 +41,7 @@ export default function useSharedRef<T>(initialValue: T, refsToShare: Array<Inpu
    * Let's add custom get property called 'current' that will return
    * fresh value of innerRef.current
    */
-  if (!(sharingRef as any).current) {
+  if (!sharingRef.hasOwnProperty('current')) {
     Object.defineProperty(sharingRef, 'current', {
       get() {
         return innerRef.current
