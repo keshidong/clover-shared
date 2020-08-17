@@ -3,19 +3,21 @@ import React from 'react'
 import useSharedRef from './useSharedRef'
 import hoistStatics from 'hoist-non-react-statics'
 
-export const withHooks = <T, P>(useHooks: (props: P & T, ref?: React.Ref) => (T | undefined), option = { withRef: false }) => (
+type K<P> = P extends { ref: React.Ref<infer T> } ? T : never;
+
+export const withHooks = <T>(useHooks: <R, P1>(props: P1 & T, ref?: React.Ref<R>) => (T | undefined), option = { withRef: false }) => <P>(
   ComposedComponent: React.ElementType<P>
 ): React.ElementType<P & T> => {
-  // TODO ref type
   const WithHookPureFunctionWrapper = (props: P & T) => {
     const restProps = useHooks(props)
     return React.createElement(
       ...(restProps ? restProps as any : props)
     )
   }
+
   const WithHookClassWrapper = React.forwardRef<any, any>((props: P & T, forwardedRef: React.Ref) => {
     const ref = useSharedRef(null, [forwardedRef])
-    const restProps = useHooks(props, ref)
+    const restProps = useHooks<K<P>, P>(props, ref)
     return React.createElement(ComposedComponent, {
       ...(restProps ? restProps : props),
       ref,
