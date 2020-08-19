@@ -2,6 +2,8 @@
 import React, { useEffect, useRef } from 'react'
 import ReactDOM from 'react-dom'
 
+// TODO: performance event pool with react context?
+// TODO: avoid re-(add/remove)EventListener event
 const EventShell = function ({ children, addEventListener }) {
     const refs: any[] = [];
     const _children = React.Children.map(children, (child, index: number) => {
