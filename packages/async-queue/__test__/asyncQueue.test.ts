@@ -5,7 +5,7 @@ test('throw error when push not func', async () => {
   try {
     // @ts-ignore
     const p = queue.push('The first parameter not function', 'blockTaskId')
-    expect('Never execute here').toBe('Never execute here')
+    expect('Never execute here').not.toBe('Never execute here')
   } catch (error) {}
 })
 
@@ -56,6 +56,7 @@ test('reject async task', async () => {
   const p = queue.push(asyncFn, 'blockTaskId')
   try {
     await p
+    expect('Never execute here').not.toBe('Never execute here')
   } catch (error) {
     expect(error).toEqual('reject value')
   }
