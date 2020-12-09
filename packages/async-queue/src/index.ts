@@ -5,7 +5,7 @@ type MicroTask<T> = {
   executedAt?: Date;
   asyncFn: AwaitQueueTask<T>,
   resolve: (...args: any[]) => any;
-	reject: (error: Error) => void;
+  reject: (error: Error) => void;
 }
 
 type MacroTask = Map<string, MicroTask<unknown>[]>
@@ -14,7 +14,7 @@ class AsyncQueue {
   pendingMacroTasks: MacroTask = new Map()
   push<T> (fn: AwaitQueueTask<T>, macroId: string) {
     if (typeof fn !== 'function') {
-			throw new TypeError('the first parameter must be an asynchronous function.')
+      throw new TypeError('the first parameter must be an asynchronous function.')
     }
 
     return new Promise((resolve, reject) => {
@@ -28,7 +28,7 @@ class AsyncQueue {
         enqueuedAt: new Date(),
         asyncFn: fn,
         resolve,
-				reject,
+        reject,
       })
 
       if (microTasks.length === 1) {
